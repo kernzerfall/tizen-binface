@@ -46,33 +46,23 @@ static void update_watch(appdata_s *ad, watch_time_h watch_time, int ambient){
 		int n=hour24,c,k;
 			for(c=4;c>=0;--c){
 				k=n>>c;
-				if(k&1)
-					turnOnHour(ad,4-c);
-				else
-					turnOffHour(ad,4-c);
+				if (k&1) turnOnHour(ad,4-c);
+				else     turnOffHour(ad,4-c);
 			}
 			n=minute;
 			for(c=5;c>=0;--c){
 				k=n>>c;
-				if(k&1)
-					turnOnMinute(ad,5-c);
-				else
-					turnOffMinute(ad,5-c);
+				if (k&1) turnOnMinute(ad,5-c);
+				else	 turnOffMinute(ad,5-c);
 			}
 		if (!ambient) {
 			n=second;
 			for(c=5;c>=0;--c){
 				k=n>>c;
-				if(k&1)
-					turnOnSecond(ad,5-c);
-				else
-					turnOffSecond(ad,5-c);
+				if (k&1) turnOnSecond(ad,5-c);
+				else	 turnOffSecond(ad,5-c);
 			}
-		}else{
-			for(c=0;c<6;++c){
-					turnOffSecond(ad,c);
-			}
-		}
+		}else for(c=0;c<6;++c) turnOffSecond(ad,c);
 }
 
 static void create_base_gui(appdata_s *ad, int width, int height) {
