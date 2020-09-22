@@ -1,6 +1,6 @@
-#ifndef __binface_H__
-#define __binface_H__
+#pragma once
 
+#include <tizen.h>
 #include <watch_app.h>
 #include <watch_app_efl.h>
 #include <Elementary.h>
@@ -15,4 +15,7 @@
 #define PACKAGE "kzf.binface"
 #endif
 
-#endif /* __binface_H__ */
+#define COLOR_ON 		41,98,255,255
+#define COLOR_OFF 		0,0,0,0
+
+#define TEXT_BUF_SIZE 256

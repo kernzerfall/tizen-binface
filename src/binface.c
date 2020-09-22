@@ -1,37 +1,41 @@
-#include <tizen.h>
 #include "binface.h"
 
-typedef Evas_Object eo;
 typedef struct appdata {
+	// Tizen stuff
 	Evas_Object *win;
 	Evas_Object *conform;
 	Evas_Object *label;
-	eo *hours[5];
-	eo *minutes[6];
-	eo *seconds[6];
-	eo *hoursBox;
+	// Hours: Number goes up to 24, so we need up to 5 binary digits to display it (1111b=15d and 11111b=31d)
+	Evas_Object *hours[5];
+	// Minutes: Number goes up to 60, so we need up to 6 binary digits to display it (11111b=31d and 111111b=63d)
+	Evas_Object *minutes[6];
+	// Seconds: Number goes up to 60, so we need up to 6 binary digits to display it (11111b=31d and 111111b=63d)
+	Evas_Object *seconds[6];
 } appdata_s;
 
-#define TEXT_BUF_SIZE 256
-
-static void turnOnHour(appdata_s *ad,int i){
-	evas_object_color_set(ad->hours[i],41,98,255,255);
+// Turn on i-th hour indicator
+static void hrIndicatorOn(appdata_s *ad, int i){
+	evas_object_color_set(ad->hours[i], COLOR_ON);
 }
-
-static void turnOnMinute(appdata_s *ad,int i){
-	evas_object_color_set(ad->minutes[i],41,98,255,255);
+// Turn on i-th minute indicator
+static void minIndicatorOn(appdata_s *ad, int i){
+	evas_object_color_set(ad->minutes[i], COLOR_ON);
 }
-static void turnOnSecond(appdata_s *ad,int i){
-	evas_object_color_set(ad->seconds[i],41,98,255,255);
+// Turn on i-th second indicator
+static void secIndicatorOn(appdata_s *ad, int i){
+	evas_object_color_set(ad->seconds[i], COLOR_ON);
 }
-static void turnOffHour(appdata_s *ad,int i){
-	evas_object_color_set(ad->hours[i],0,0,0,0);
+// Turn off i-th hour indicator
+static void hrIndicatorOff(appdata_s *ad, int i){
+	evas_object_color_set(ad->hours[i], COLOR_OFF);
 }
-static void turnOffMinute(appdata_s *ad,int i){
-	evas_object_color_set(ad->minutes[i],0,0,0,0);
+// Turn off i-th minute indicator
+static void minIndicatorOff(appdata_s *ad, int i){
+	evas_object_color_set(ad->minutes[i], COLOR_OFF);
 }
-static void turnOffSecond(appdata_s *ad,int i){
-	evas_object_color_set(ad->seconds[i],0,0,0,0);
+// Turn off i-th second indicator
+static void secIndicatorOff(appdata_s *ad, int i){
+	evas_object_color_set(ad->seconds[i], COLOR_OFF);
 }
 
 static void update_watch(appdata_s *ad, watch_time_h watch_time, int ambient){
@@ -40,29 +44,35 @@ static void update_watch(appdata_s *ad, watch_time_h watch_time, int ambient){
 	if (watch_time == NULL)
 		return;
 
+	// Get time from watch
 	watch_time_get_hour24(watch_time, &hour24);
 	watch_time_get_minute(watch_time, &minute);
 	watch_time_get_second(watch_time, &second);
+
+	// Update layout segments accordingly
 	int n=hour24,c,k;
-		for(c=4;c>=0;--c){
-			k=n>>c;
-			if (k&1) turnOnHour(ad,4-c);
-			else     turnOffHour(ad,4-c);
-		}
-		n=minute;
-		for(c=5;c>=0;--c){
-			k=n>>c;
-			if (k&1) turnOnMinute(ad,5-c);
-			else	 turnOffMinute(ad,5-c);
-		}
+	for(c=4;c>=0;--c){
+		k=n>>c;
+		if (k&1) hrIndicatorOn(ad, 4-c);
+		else     hrIndicatorOff(ad, 4-c);
+	}
+	n=minute;
+	for(c=5;c>=0;--c){
+		k=n>>c;
+		if (k&1) minIndicatorOn(ad, 5-c);
+		else	 minIndicatorOff(ad, 5-c);
+	}
+
+	// If !ambient, update/show seconds
 	if (!ambient) {
 		n=second;
 		for(c=5;c>=0;--c){
 			k=n>>c;
-			if (k&1) turnOnSecond(ad,5-c);
-			else	 turnOffSecond(ad,5-c);
+			if (k&1) secIndicatorOn(ad, 5-c);
+			else	 secIndicatorOff(ad, 5-c);
 		}
-	}else for(c=0;c<6;++c) turnOffSecond(ad,c);
+		// If ambient, black out seconds
+	}else for(c=0;c<6;++c) secIndicatorOff(ad,c);
 }
 
 static void create_base_gui(appdata_s *ad, int width, int height) {
@@ -88,30 +98,59 @@ static void create_base_gui(appdata_s *ad, int width, int height) {
 	float unit=48;
 
 	for(int i=0;i<5;++i){
+		// Create hour box i
 		ad->hours[i] = evas_object_rectangle_add(ad->conform);
-		evas_object_resize(ad->hours[i],48,48);
-		evas_object_move(ad->hours[i],(float)width/2.0+((float)i-5.0/2.0)*(float)unit,height/2-(float)unit/2.0);
-		evas_object_color_set(ad->hours[i],255-(50*i),255,255,255);
+		
+		// Resize to unit*unit
+		evas_object_resize(ad->hours[i], unit, unit);
+		
+		// Move to predefined position
+		evas_object_move(ad->hours[i], (float)width/2.0+((float)i-5.0/2.0)*(float)unit,height/2.0-(float)unit/2.0);
+		
+		// Uncomment for debugging: make boxes easily distinguishable. Comment out update_watch for this to work.
+		//evas_object_color_set(ad->hours[i],255-(50*i),255-(30*i),255-(10*i),255);
+
+		// Make it visible
 		evas_object_show(ad->hours[i]);
 	}
 	for(int i=0;i<6;++i){
+		// Create minute box i
 		ad->minutes[i] = evas_object_rectangle_add(ad->conform);
-		evas_object_resize(ad->minutes[i],48,48);
-		evas_object_move(ad->minutes[i],(float)width/2.0+((float)i-3.0)*(float)unit,height/3-(float)unit/2.0);
-		evas_object_color_set(ad->minutes[i],255-(50*i),255,255,255);
+		
+		// Resize to unit*unit
+		evas_object_resize(ad->minutes[i],unit,unit);
+
+		// Move to predefined position
+		evas_object_move(ad->minutes[i],(float)width/2.0+((float)i-3.0)*(float)unit,height/3.0-(float)unit/2.0);
+
+		// Uncomment for debugging: make boxes easily distinguishable. Comment out update_watch for this to work.
+		//evas_object_color_set(ad->minutes[i],255-(50*i),255-(30*i),255-(10*i),255);
+
+		// Make it visible
 		evas_object_show(ad->minutes[i]);
 	}
 	for(int i=0;i<6;++i){
+		// Create second box i
 		ad->seconds[i] = evas_object_rectangle_add(ad->conform);
+
+		// Resize to unit*unit
 		evas_object_resize(ad->seconds[i],48,48);
+
+		// Move to predefined position
 		evas_object_move(ad->seconds[i],(float)width/2.0+((float)i-3.0)*(float)unit,2.0*(float)height/3.0-(float)unit/2.0);
-		evas_object_color_set(ad->seconds[i],255-(50*i),255,255,255);
+
+		// Uncomment for debugging: make boxes easily distinguishable. Comment out update_watch for this to work.
+		evas_object_color_set(ad->seconds[i],255-(50*i),255-(30*i),255-(10*i),255);
+
+		// Make it visible
 		evas_object_show(ad->seconds[i]);
 	}
+
 	ret = watch_time_get_current_time(&watch_time);
 	if (ret != APP_ERROR_NONE)
 		dlog_print(DLOG_ERROR, LOG_TAG, "failed to get current time. err = %d", ret);
 
+	// Call update_watch to eliminate a glitch 
 	update_watch(ad, watch_time, 0);
 	watch_time_delete(watch_time);
 
