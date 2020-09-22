@@ -37,32 +37,32 @@ static void turnOffSecond(appdata_s *ad,int i){
 static void update_watch(appdata_s *ad, watch_time_h watch_time, int ambient){
 	int hour24, minute, second;
 
-		if (watch_time == NULL)
-			return;
+	if (watch_time == NULL)
+		return;
 
-		watch_time_get_hour24(watch_time, &hour24);
-		watch_time_get_minute(watch_time, &minute);
-		watch_time_get_second(watch_time, &second);
-		int n=hour24,c,k;
-			for(c=4;c>=0;--c){
-				k=n>>c;
-				if (k&1) turnOnHour(ad,4-c);
-				else     turnOffHour(ad,4-c);
-			}
-			n=minute;
-			for(c=5;c>=0;--c){
-				k=n>>c;
-				if (k&1) turnOnMinute(ad,5-c);
-				else	 turnOffMinute(ad,5-c);
-			}
-		if (!ambient) {
-			n=second;
-			for(c=5;c>=0;--c){
-				k=n>>c;
-				if (k&1) turnOnSecond(ad,5-c);
-				else	 turnOffSecond(ad,5-c);
-			}
-		}else for(c=0;c<6;++c) turnOffSecond(ad,c);
+	watch_time_get_hour24(watch_time, &hour24);
+	watch_time_get_minute(watch_time, &minute);
+	watch_time_get_second(watch_time, &second);
+	int n=hour24,c,k;
+		for(c=4;c>=0;--c){
+			k=n>>c;
+			if (k&1) turnOnHour(ad,4-c);
+			else     turnOffHour(ad,4-c);
+		}
+		n=minute;
+		for(c=5;c>=0;--c){
+			k=n>>c;
+			if (k&1) turnOnMinute(ad,5-c);
+			else	 turnOffMinute(ad,5-c);
+		}
+	if (!ambient) {
+		n=second;
+		for(c=5;c>=0;--c){
+			k=n>>c;
+			if (k&1) turnOnSecond(ad,5-c);
+			else	 turnOffSecond(ad,5-c);
+		}
+	}else for(c=0;c<6;++c) turnOffSecond(ad,c);
 }
 
 static void create_base_gui(appdata_s *ad, int width, int height) {
@@ -102,12 +102,12 @@ static void create_base_gui(appdata_s *ad, int width, int height) {
 		evas_object_show(ad->minutes[i]);
 	}
 	for(int i=0;i<6;++i){
-			ad->seconds[i] = evas_object_rectangle_add(ad->conform);
-			evas_object_resize(ad->seconds[i],48,48);
-			evas_object_move(ad->seconds[i],(float)width/2.0+((float)i-3.0)*(float)unit,2.0*(float)height/3.0-(float)unit/2.0);
-			evas_object_color_set(ad->seconds[i],255-(50*i),255,255,255);
-			evas_object_show(ad->seconds[i]);
-		}
+		ad->seconds[i] = evas_object_rectangle_add(ad->conform);
+		evas_object_resize(ad->seconds[i],48,48);
+		evas_object_move(ad->seconds[i],(float)width/2.0+((float)i-3.0)*(float)unit,2.0*(float)height/3.0-(float)unit/2.0);
+		evas_object_color_set(ad->seconds[i],255-(50*i),255,255,255);
+		evas_object_show(ad->seconds[i]);
+	}
 	ret = watch_time_get_current_time(&watch_time);
 	if (ret != APP_ERROR_NONE)
 		dlog_print(DLOG_ERROR, LOG_TAG, "failed to get current time. err = %d", ret);
