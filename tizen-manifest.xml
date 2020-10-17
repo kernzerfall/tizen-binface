@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<manifest xmlns="http://tizen.org/ns/packages" api-version="5.5" package="kzf.binface" version="1.0.0">
+<manifest xmlns="http://tizen.org/ns/packages" api-version="4.0" package="kzf.binface" version="1.0.0">
     <author>kernzerfall</author>
     <profile name="wearable"/>
     <watch-application ambient-support="true" appid="kzf.binface" exec="binface">
